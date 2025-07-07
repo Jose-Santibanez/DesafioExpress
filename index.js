@@ -1,0 +1,54 @@
+import express from "express";
+import { writeFile, readFile } from "node:fs/promises";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { nanoid } from "nanoid";
+
+
+const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const getCanciones = async () => {
+    const fsReadFile = await readFile('canciones.json','utf-8')
+    const cancionesjson = JSON.parse(fsReadFile)
+    return cancionesjson
+}
+const creaCancionesjson=  async(item) =>{
+    const cancionesjson = await getCanciones()  
+    cancionesjson.push(item)
+    await writeFile('canciones.json', JSON.stringify(cancionesjson))
+}
+
+
+
+app.use(express.json()); // extraer la información del payload y trasnformarlo en JSON
+
+app.listen(3000, () => {
+  console.log("Example app listening on port 3000");
+});
+
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
+});
+// GET: Enviamos todas las canciones al cliente en un JSON
+app.get("/canciones", async (req,res)=>{
+     const canciones = await getCanciones();
+    res.json(canciones)
+})
+
+// POST : Recibe los datos correspondientes y los inserta en un JSON
+app.post("/canciones", async (req, res) => {
+    const {nombre, artista, tono} = req.body;
+  
+    const nuevaCancion = {
+    id: nanoid(),
+    nombre,
+    artista,
+    tono,
+  };
+
+  creaCancionesjson(nuevaCancion)
+  res.send('Se crea cancion con exito')
+});
+
