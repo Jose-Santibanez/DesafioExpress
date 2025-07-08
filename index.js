@@ -52,3 +52,22 @@ app.post("/canciones", async (req, res) => {
   res.send('Se crea cancion con exito')
 });
 
+// DELETE: Busca el elemento y luego con un filter extraemos todas las coincidencias filter(e => e.id != id)
+
+app.delete('/canciones/:id', async (req, res)=>{
+    let { id } = req.params;
+
+    let canciones = await getCanciones();
+
+    let cancion = canciones.find(e => e.id == id);
+
+    if(!cancion){
+        res.status(404).json({ mensaje : 'cancion no existe'})
+    }
+
+    canciones = canciones.filter(e => e.id != id);
+    await writeFile('canciones.json', JSON.stringify(canciones))
+    res.json(canciones)
+})
+
+
