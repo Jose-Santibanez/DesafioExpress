@@ -8,7 +8,7 @@ import cors from "cors";
 const app = express();
 app.use(express.json()); // extraer la información del payload y trasnformarlo en JSON
 app.use(cors()); // Habilitamos CORS
-app.listen(5000, () => {
+app.listen(3000, () => {
   console.log("Example app listening on port 3000");
 });
 
@@ -72,13 +72,11 @@ app.delete("/canciones/:id", async (req, res) => {
 app.put("/canciones/:id", async (req, res) => {
   let { id } = req.params;
   let canciones = await getCanciones();
-  console.log(req.body);
-  canciones = canciones.map((e) => {
-    if (e.id == id) {
-      return { ...e, artista: "DUH HAST" };
-    }
-    return e;
-  });
+  const cancionActualizada = req.body;
+  const index = canciones.findIndex((e) => e.id === id);
 
+  canciones[index] = cancionActualizada;
+   
+  await writeFile('canciones.json', JSON.stringify(canciones))
   res.json(canciones);
 });
